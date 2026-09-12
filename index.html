@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReelCrew — Campus Reel Pipeline</title>
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0D0D11;
+    --panel:#17171C;
+    --panel-2:#1E1E25;
+    --line:#2A2A32;
+    --red:#FF3B5C;
+    --teal:#29E0C9;
+    --text:#F2F1EC;
+    --muted:#8A8A94;
+    --muted-2:#5C5C66;
+    --success:#10B981;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--ink);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+    padding:28px 20px 80px;
+  }
+  .mono{font-family:'JetBrains Mono',monospace;}
+  .wrap{max-width:1180px; margin:0 auto;}
+
+  /* header */
+  header{
+    display:flex; justify-content:space-between; align-items:flex-end;
+    margin-bottom:34px; flex-wrap:wrap; gap:16px;
+    border-bottom:1px solid var(--line); padding-bottom:20px;
+  }
+  .brand{display:flex; align-items:center; gap:12px;}
+  .brand .dot{width:12px; height:12px; border-radius:50%; background:var(--red); box-shadow:0 0 14px var(--red);}
+  .brand h1{
+    font-family:'Bricolage Grotesque',sans-serif;
+    font-weight:800; font-size:24px; letter-spacing:-0.02em;
+  }
+  .badge-live{
+    font-size:11px; font-family:'JetBrains Mono',monospace;
+    background:rgba(41,224,201,0.12); color:var(--teal);
+    border:1px solid rgba(41,224,201,0.3); padding:3px 8px; border-radius:100px;
+  }
+  header p{color:var(--muted); font-size:13px; max-width:340px; text-align:right; line-height:1.5;}
+
+  /* hero grid */
+  .hero{
+    display:grid; grid-template-columns:1.15fr 0.85fr; gap:28px;
+    margin-bottom:36px;
+  }
+  @media(max-width:860px){ .hero{grid-template-columns:1fr;} }
+
+  .card{
+    background:var(--panel); border:1px solid var(--line);
+    border-radius:18px; padding:26px;
+  }
+
+  .input-card h2{
+    font-family:'Bricolage Grotesque',sans-serif;
+    font-size:26px; font-weight:700; letter-spacing:-0.01em;
+    line-height:1.25; margin-bottom:8px;
+  }
+  .input-card .sub{color:var(--muted); font-size:14px; margin-bottom:22px; max-width:440px;}
+
+  label{display:block; font-size:11px; color:var(--muted); margin-bottom:8px; font-family:'JetBrains Mono',monospace; letter-spacing:0.05em;}
+  .theme-input{
+    width:100%; background:var(--ink); border:1px solid var(--line);
+    border-radius:10px; padding:14px 16px; color:var(--text);
+    font-family:'Inter',sans-serif; font-size:15px; resize:none;
+    min-height:86px; line-height:1.5; transition:border-color .2s;
+  }
+  .theme-input:focus{outline:none; border-color:var(--teal); box-shadow:0 0 0 1px var(--teal);}
+
+  .chip-row{display:flex; gap:8px; flex-wrap:wrap; margin:14px 0 22px;}
+  .chip{
+    font-size:12px; padding:7px 13px; border-radius:100px;
+    border:1px solid var(--line); color:var(--muted-2);
+    background:var(--ink); cursor:pointer; transition:.15s;
+  }
+  .chip:hover{border-color:var(--teal); color:var(--teal); background:rgba(41,224,201,0.05);}
+
+  .run-btn{
+    width:100%; background:var(--red); color:#fff; border:none;
+    border-radius:10px; padding:15px; font-size:15px; font-weight:600;
+    cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px;
+    font-family:'Inter',sans-serif; transition:all .2s;
+    box-shadow:0 4px 20px rgba(255,59,92,0.3);
+  }
+  .run-btn:hover{background:#ff5170; transform:translateY(-1px); box-shadow:0 6px 24px rgba(255,59,92,0.4);}
+  .run-btn:disabled{background:var(--panel-2); color:var(--muted-2); cursor:not-allowed; transform:none; box-shadow:none;}
+  .run-btn .rec{width:8px;height:8px;border-radius:50%; background:#fff;}
+  .spinner{
+    width:14px; height:14px; border:2px solid rgba(255,255,255,0.3);
+    border-top-color:#fff; border-radius:50%; animation:spin .8s linear infinite; display:none;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* phone mockup */
+  .phone-wrap{display:flex; align-items:center; justify-content:center;}
+  .phone{
+    width:240px; height:480px; background:#000; border-radius:36px;
+    border:7px solid #26262E; position:relative; overflow:hidden;
+    box-shadow:0 30px 70px -20px rgba(0,0,0,.85), 0 0 0 1px rgba(255,255,255,0.05);
+  }
+  .phone::before{
+    content:''; position:absolute; top:0; left:50%; transform:translateX(-50%);
+    width:84px; height:18px; background:#26262E; border-radius:0 0 14px 14px; z-index:5;
+  }
+  .phone-screen{
+    position:absolute; inset:0; background:linear-gradient(170deg,#1c1c24,#0b0b0e);
+    display:flex; flex-direction:column; justify-content:space-between;
+    padding:34px 14px 16px;
+  }
+  .phone-timer{
+    align-self:flex-start; font-family:'JetBrains Mono',monospace;
+    font-size:11px; color:var(--red); background:rgba(255,59,92,.12);
+    border:1px solid rgba(255,59,92,.3); padding:3px 8px; border-radius:100px;
+    display:flex; align-items:center; gap:6px;
+  }
+  .phone-timer .live-dot{width:6px;height:6px;border-radius:50%; background:var(--red); animation:pulse 1.4s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;} 50%{opacity:.3;}}
+
+  .phone-hook{
+    font-family:'Bricolage Grotesque',sans-serif; font-weight:700;
+    font-size:18px; line-height:1.3; color:#fff; text-shadow:0 2px 14px rgba(0,0,0,.8);
+    min-height:70px; margin-top:20px; transition:opacity .3s;
+  }
+  .phone-caption{
+    font-size:11.5px; color:var(--muted); line-height:1.45; min-height:48px;
+    overflow:hidden; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical;
+  }
+  .phone-bottom{display:flex; justify-content:space-between; align-items:flex-end;}
+  .phone-tag{font-size:10px; color:var(--teal); font-family:'JetBrains Mono',monospace;}
+  .phone-actions{display:flex; flex-direction:column; gap:12px; align-items:center;}
+  .phone-actions span{font-size:15px; color:#fff; opacity:.85;}
+  .phone-actions small{display:block; font-size:8.5px; color:var(--muted-2); margin-top:2px; text-align:center;}
+
+  /* error banner */
+  .error-banner{
+    display:none; background:rgba(255,59,92,0.12); border:1px solid var(--red);
+    color:#ff7891; padding:14px 18px; border-radius:12px; margin-bottom:24px;
+    font-size:13.5px; line-height:1.5;
+  }
+
+  /* timeline / pipeline scrubber */
+  .timeline-card{margin-bottom:28px;}
+  .timeline-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:22px; flex-wrap:wrap; gap:8px;}
+  .timeline-head h3{font-family:'Bricolage Grotesque',sans-serif; font-size:18px; font-weight:700;}
+  .timeline-head .status{font-size:12px; color:var(--muted); font-family:'JetBrains Mono',monospace;}
+
+  .scrubber{position:relative; padding-top:6px;}
+  .track{
+    position:relative; height:6px; background:var(--panel-2);
+    border-radius:100px; overflow:hidden; display:flex;
+  }
+  .seg{flex:1; position:relative; border-right:2px solid var(--ink);}
+  .seg:last-child{border-right:none;}
+  .seg .fill{
+    position:absolute; inset:0; background:var(--muted-2); width:0%;
+    transition:width 0.8s cubic-bezier(.4,0,.2,1);
+  }
+  .seg.done .fill{width:100%; background:var(--teal);}
+  .seg.active .fill{width:100%; background:var(--red); animation:indeterminate 2s infinite linear;}
+  @keyframes indeterminate{0%{filter:brightness(1);} 50%{filter:brightness(1.4);} 100%{filter:brightness(1);}}
+
+  .stage-labels{display:flex; margin-top:14px; gap:8px;}
+  .stage-label{
+    flex:1; cursor:pointer; padding:10px 12px; border-radius:10px;
+    opacity:.45; transition:.2s; border:1px solid transparent;
+  }
+  .stage-label:hover{opacity:.8; background:rgba(255,255,255,0.02);}
+  .stage-label.unlocked{opacity:1;}
+  .stage-label.active{background:rgba(255,59,92,0.08); border-color:rgba(255,59,92,0.25);}
+  .stage-label.active .n{color:var(--red);}
+  .stage-label.done .n{color:var(--teal);}
+  .stage-label .n{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted-2);}
+  .stage-label h4{font-family:'Bricolage Grotesque',sans-serif; font-size:15px; font-weight:700; margin-top:2px;}
+  .stage-label p{font-size:12px; color:var(--muted); margin-top:3px; line-height:1.4;}
+
+  /* stage output panels */
+  .panels{display:flex; flex-direction:column; gap:18px;}
+  .panel{
+    background:var(--panel); border:1px solid var(--line); border-radius:18px;
+    padding:26px; display:none;
+  }
+  .panel.show{display:block; animation:rise .35s ease;}
+  @keyframes rise{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);}}
+  
+  .panel-top{
+    display:flex; justify-content:space-between; align-items:center;
+    margin-bottom:18px; flex-wrap:wrap; gap:10px;
+  }
+  .panel-head{display:flex; align-items:center; gap:10px;}
+  .panel-head .idx{
+    width:26px; height:26px; border-radius:7px; background:var(--panel-2);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--teal); flex-shrink:0;
+  }
+  .panel-head h4{font-family:'Bricolage Grotesque',sans-serif; font-size:17px; font-weight:700;}
+
+  /* action copy buttons */
+  .action-btn{
+    background:var(--panel-2); border:1px solid var(--line); color:var(--muted);
+    font-family:'JetBrains Mono',monospace; font-size:11px; padding:6px 12px;
+    border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:6px;
+    transition:.15s;
+  }
+  .action-btn:hover{color:var(--text); border-color:var(--teal);}
+  .action-btn.copied{background:rgba(16,185,129,0.15); border-color:var(--success); color:var(--success);}
+
+  .kv{display:grid; grid-template-columns:130px 1fr; gap:12px 18px; font-size:14px; margin-bottom:8px;}
+  .kv .k{color:var(--muted-2); font-size:11px; font-family:'JetBrains Mono',monospace; padding-top:2px; letter-spacing:0.04em;}
+  .kv .v{color:var(--text); line-height:1.55;}
+  .kv .v.emph{color:var(--teal);}
+
+  /* table */
+  .table-wrap{overflow-x:auto;}
+  table{width:100%; border-collapse:collapse; font-size:13px;}
+  th{
+    text-align:left; font-family:'JetBrains Mono',monospace; font-weight:500;
+    color:var(--muted-2); font-size:11px; padding:10px; border-bottom:1px solid var(--line);
+    letter-spacing:0.04em;
+  }
+  td{padding:12px 10px; border-bottom:1px solid var(--line); vertical-align:top; line-height:1.5;}
+  td.timing{color:var(--teal); font-family:'JetBrains Mono',monospace; white-space:nowrap;}
+  td.type{
+    font-size:10px; font-family:'JetBrains Mono',monospace;
+    color:var(--muted);
+  }
+  .badge-type{
+    display:inline-block; padding:2px 6px; border-radius:4px;
+    background:var(--panel-2); border:1px solid var(--line);
+  }
+
+  .final-grid{display:grid; grid-template-columns:1fr 1fr; gap:24px;}
+  @media(max-width:700px){.final-grid{grid-template-columns:1fr;}}
+  .final-block h5{font-size:11px; color:var(--muted-2); font-family:'JetBrains Mono',monospace; margin-bottom:10px; letter-spacing:0.04em;}
+  .caption-box{
+    background:var(--ink); border:1px solid var(--line); border-radius:10px;
+    padding:16px; font-size:14px; line-height:1.6; white-space:pre-wrap;
+  }
+  .tag-tier{margin-bottom:14px;}
+  .tag-tier .label{font-size:10px; color:var(--muted-2); font-family:'JetBrains Mono',monospace; margin-bottom:6px; letter-spacing:0.04em;}
+  .tags{display:flex; flex-wrap:wrap; gap:6px;}
+  .tag{
+    font-size:12px; padding:4px 10px; border-radius:100px;
+    background:var(--ink); border:1px solid var(--line); color:var(--muted);
+  }
+  .tag.reach{border-color:rgba(255,59,92,.35); color:var(--red); background:rgba(255,59,92,0.05);}
+  .tag.niche{border-color:rgba(41,224,201,.35); color:var(--teal); background:rgba(41,224,201,0.05);}
+
+  .post-time{display:flex; align-items:baseline; gap:10px; margin-bottom:6px;}
+  .post-time .big{font-family:'Bricolage Grotesque',sans-serif; font-size:20px; font-weight:700;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <div class="dot"></div>
+      <h1>REELCREW</h1>
+      <span class="badge-live">LIVE BACKEND</span>
+    </div>
+    <p>Theme in, ready-to-shoot reel package out — built for campus content, three CrewAI agents deep.</p>
+  </header>
+
+  <div class="error-banner" id="errorBanner"></div>
+
+  <div class="hero">
+    <div class="card input-card">
+      <h2>What's the reel about?</h2>
+      <p class="sub">One line is enough. The 3-agent Crew handles viral concept, timed shot script, and viral engagement.</p>
+      <label for="themeInput">REEL_THEME</label>
+      <textarea class="theme-input" id="themeInput">A day in the life of a CSE student during placement season</textarea>
+      <div class="chip-row">
+        <button type="button" class="chip" onclick="setTheme('Hostel wifi dying during an online mock interview')">Hostel wifi during mocks</button>
+        <button type="button" class="chip" onclick="setTheme('Group project where one person does everything')">Group project chaos</button>
+        <button type="button" class="chip" onclick="setTheme('Canteen queue vs exam week stress')">Canteen queue, exam week</button>
+        <button type="button" class="chip" onclick="setTheme('Trying to understand pointers the night before C programming exam')">Pointers night before exam</button>
+      </div>
+      <button class="run-btn" id="runBtn" onclick="runCrew()">
+        <span class="rec" id="runRec"></span>
+        <span class="spinner" id="runSpinner"></span>
+        <span id="runText">RUN CREW</span>
+      </button>
+    </div>
+
+    <div class="card phone-wrap">
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="phone-timer"><span class="live-dot"></span><span id="phoneTimer">0:00</span></div>
+          <div class="phone-hook" id="phoneHook">Your hook line will render here once the crew finishes ideation.</div>
+          <div class="phone-caption" id="phoneCaption"></div>
+          <div class="phone-bottom">
+            <div class="phone-tag" id="phoneTag">#reelcrew</div>
+            <div class="phone-actions">
+              <div><span>♡</span><small>48.2k</small></div>
+              <div><span>💬</span><small>1.2k</small></div>
+              <div><span>↗</span><small>9.4k</small></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card timeline-card">
+    <div class="timeline-head">
+      <h3>Pipeline</h3>
+      <span class="status" id="pipelineStatus">idle — waiting to run</span>
+    </div>
+    <div class="scrubber">
+      <div class="track">
+        <div class="seg" id="seg1"><div class="fill"></div></div>
+        <div class="seg" id="seg2"><div class="fill"></div></div>
+        <div class="seg" id="seg3"><div class="fill"></div></div>
+      </div>
+      <div class="stage-labels">
+        <div class="stage-label" id="label1" onclick="showPanel(1)">
+          <div class="n">01</div><h4>Ideation</h4>
+          <p>Viral concept & audio vibe</p>
+        </div>
+        <div class="stage-label" id="label2" onclick="showPanel(2)">
+          <div class="n">02</div><h4>Script</h4>
+          <p>Shot-by-shot & dialogues</p>
+        </div>
+        <div class="stage-label" id="label3" onclick="showPanel(3)">
+          <div class="n">03</div><h4>Optimize</h4>
+          <p>Caption, tags, peak timing</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panels">
+    <!-- PANEL 1: IDEATION -->
+    <div class="panel" id="panel1">
+      <div class="panel-top">
+        <div class="panel-head"><div class="idx">01</div><h4>Reel Concept</h4></div>
+        <button class="action-btn" onclick="copyConcept()"><span id="copyConceptText">Copy Concept</span></button>
+      </div>
+      <div class="kv">
+        <div class="k">CONCEPT</div><div class="v" id="valConcept">Split-screen "Expectation vs Reality" — LinkedIn-post version of the day vs the actual chaos of placement prep.</div>
+        <div class="k">FORMAT</div><div class="v" id="valFormat">Fast-cut split-screen / transition reveal</div>
+        <div class="k">AUDIO STYLE</div><div class="v" id="valAudio">Fast-cut meme audio, beat-drop on each "reality" reveal</div>
+        <div class="k">TARGET EMOTION</div><div class="v emph" id="valEmotion">Anxious recognition — "this is literally me"</div>
+        <div class="k">WHY IT WORKS</div><div class="v" id="valWhy">Placement-season WhatsApp groups are already drowning in this exact anxiety — naming it specifically makes it forwardable, not just watchable.</div>
+      </div>
+    </div>
+
+    <!-- PANEL 2: SCRIPT -->
+    <div class="panel" id="panel2">
+      <div class="panel-top">
+        <div class="panel-head"><div class="idx">02</div><h4>Shot Script</h4></div>
+        <button class="action-btn" onclick="copyScript()"><span id="copyScriptText">Copy Script</span></button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Shot</th><th>Timing</th><th>Type</th><th>Line / Dialogue</th></tr></thead>
+          <tbody id="shotTableBody">
+            <tr><td>1 — Hook</td><td class="timing">0–2s</td><td class="type"><span class="badge-type">OVERLAY</span></td><td>"LinkedIn me vs Reality me" — split-screen wipe opens</td></tr>
+            <tr><td>2</td><td class="timing">2–6s</td><td class="type"><span class="badge-type">SPOKEN</span></td><td>"Woke up at 5am to revise DSA" — confident, notes organized</td></tr>
+            <tr><td>3</td><td class="timing">6–9s</td><td class="type"><span class="badge-type">SPOKEN</span></td><td>"Alarm se 5am pe uthke... phir so gaya" — same person, disheveled</td></tr>
+            <tr><td>4</td><td class="timing">9–13s</td><td class="type"><span class="badge-type">OVERLAY</span></td><td>"3 mock interviews today" — calendar packed on laptop</td></tr>
+            <tr><td>5</td><td class="timing">13–17s</td><td class="type"><span class="badge-type">TEXT</span></td><td>"Regret to inform you..." — rejection email notification</td></tr>
+            <tr><td>6 — CTA</td><td class="timing">17–20s</td><td class="type"><span class="badge-type">SPOKEN</span></td><td>"Kal phir try karenge" — loops back to Shot 1</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PANEL 3: OPTIMIZE -->
+    <div class="panel" id="panel3">
+      <div class="panel-top">
+        <div class="panel-head"><div class="idx">03</div><h4>Final Package</h4></div>
+        <button class="action-btn" onclick="copyCaption()"><span id="copyCaptionText">Copy Caption & Hashtags</span></button>
+      </div>
+      <div class="final-grid">
+        <div class="final-block">
+          <h5>CAPTION</h5>
+          <div class="caption-box" id="finalCaption">Bhai "excited to announce" likhne se pehle ye 20 seconds dekh lo. Tag your placement-season roommate.</div>
+          <h5 style="margin-top:20px;">POSTING TIME</h5>
+          <div class="post-time"><span class="big" id="postingTime">9–10:30 PM</span><span style="color:var(--muted); font-size:13px;" id="postingDay">weekday</span></div>
+          <p style="font-size:13px; color:var(--muted); line-height:1.5;" id="postingTip">Mock interviews wrap by evening — this is peak forward-to-hostel-group scroll time.</p>
+        </div>
+        <div class="final-block">
+          <h5>HASHTAGS</h5>
+          <div class="tag-tier">
+            <div class="label">HIGH-REACH</div>
+            <div class="tags" id="reachTags">
+              <span class="tag reach">#CollegeLife</span><span class="tag reach">#Relatable</span><span class="tag reach">#PlacementSeason</span>
+            </div>
+          </div>
+          <div class="tag-tier">
+            <div class="label">NICHE</div>
+            <div class="tags" id="nicheTags">
+              <span class="tag niche">#CSEStudent</span><span class="tag niche">#CampusPlacements</span><span class="tag niche">#DSAGrind</span><span class="tag niche">#FinalYearProblems</span>
+            </div>
+          </div>
+          <div class="tag-tier">
+            <div class="label">COMMUNITY</div>
+            <div class="tags" id="communityTags">
+              <span class="tag">#HyderabadColleges</span><span class="tag">#BTech2027</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let currentData = {
+  hook_preview: '"LinkedIn me vs Reality me" — split-screen wipe opens',
+  concept: {
+    concept: 'Split-screen "Expectation vs Reality" — LinkedIn-post version of the day vs the actual chaos of placement prep.',
+    format: 'Fast-cut split-screen / transition reveal',
+    audio_style: 'Fast-cut meme audio, beat-drop on each "reality" reveal',
+    target_emotion: 'Anxious recognition — "this is literally me"',
+    why_it_works: 'Placement-season WhatsApp groups are already drowning in this exact anxiety — naming it specifically makes it forwardable, not just watchable.'
+  },
+  shots: [
+    { shot: "1 — Hook", timing: "0–2s", type: "OVERLAY", line: '"LinkedIn me vs Reality me" — split-screen wipe opens' },
+    { shot: "2", timing: "2–6s", type: "SPOKEN", line: '"Woke up at 5am to revise DSA" — confident, notes organized' },
+    { shot: "3", timing: "6–9s", type: "SPOKEN", line: '"Alarm se 5am pe uthke... phir so gaya" — same person, disheveled' },
+    { shot: "4", timing: "9–13s", type: "OVERLAY", line: '"3 mock interviews today" — calendar packed on laptop' },
+    { shot: "5", timing: "13–17s", type: "TEXT", line: '"Regret to inform you..." — rejection email notification' },
+    { shot: "6 — CTA", timing: "17–20s", type: "SPOKEN", line: '"Kal phir try karenge" — loops back to Shot 1' }
+  ],
+  engagement: {
+    caption: 'Bhai "excited to announce" likhne se pehle ye 20 seconds dekh lo. Tag your placement-season roommate.',
+    posting_time: '9–10:30 PM',
+    posting_day: 'weekday',
+    posting_tip: 'Mock interviews wrap by evening — this is peak forward-to-hostel-group scroll time.',
+    hashtags_reach: ['#CollegeLife', '#Relatable', '#PlacementSeason'],
+    hashtags_niche: ['#CSEStudent', '#CampusPlacements', '#DSAGrind', '#FinalYearProblems'],
+    hashtags_community: ['#HyderabadColleges', '#BTech2027']
+  }
+};
+let running = false;
+let timerInt = null;
+
+function setTheme(t){
+  document.getElementById('themeInput').value = t;
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+async function runCrew(){
+  if(running) return;
+  const theme = document.getElementById('themeInput').value.trim();
+  if(!theme){
+    showError("Please enter a reel theme.");
+    return;
+  }
+
+  running = true;
+  hideError();
+
+  const btn = document.getElementById('runBtn');
+  const runRec = document.getElementById('runRec');
+  const runSpinner = document.getElementById('runSpinner');
+  const runText = document.getElementById('runText');
+
+  btn.disabled = true;
+  runRec.style.display = 'none';
+  runSpinner.style.display = 'inline-block';
+  runText.textContent = 'CREW WORKING…';
+
+  // Reset visual stages
+  ['label1','label2','label3'].forEach(id => {
+    document.getElementById(id).className = 'stage-label';
+  });
+  ['seg1','seg2','seg3'].forEach(id => {
+    document.getElementById(id).className = 'seg';
+  });
+
+  // Start mobile preview timer
+  let secondsElapsed = 0;
+  document.getElementById('phoneTimer').textContent = '0:00';
+  document.getElementById('phoneHook').textContent = 'Ideation Agent is crafting viral angles...';
+  document.getElementById('phoneCaption').textContent = 'Theme: ' + theme;
+  
+  clearInterval(timerInt);
+  timerInt = setInterval(() => {
+    secondsElapsed++;
+    const s = String(secondsElapsed % 60).padStart(2, '0');
+    const m = Math.floor(secondsElapsed / 60);
+    document.getElementById('phoneTimer').textContent = `${m}:${s}`;
+  }, 1000);
+
+  // Animate pipeline stages realistically while awaiting CrewAI API response
+  setPipelineStage(1);
+  const stage2Timer = setTimeout(() => {
+    if(running) {
+      markStageDone(1);
+      setPipelineStage(2);
+      document.getElementById('phoneHook').textContent = 'Script Writer is structuring shots & dialogue...';
+    }
+  }, 7000);
+
+  const stage3Timer = setTimeout(() => {
+    if(running) {
+      markStageDone(2);
+      setPipelineStage(3);
+      document.getElementById('phoneHook').textContent = 'Optimizer is polishing captions & hashtag tiers...';
+    }
+  }, 17000);
+
+  try {
+    const response = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ theme })
+    });
+
+    clearTimeout(stage2Timer);
+    clearTimeout(stage3Timer);
+
+    if(!response.ok) {
+      const err = await response.json().catch(() => ({ detail: 'Server error' }));
+      throw new Error(err.detail || `Server returned ${response.status}`);
+    }
+
+    const res = await response.json();
+    currentData = res.data;
+
+    // Finish all stages
+    markStageDone(1);
+    markStageDone(2);
+    markStageDone(3);
+    document.getElementById('pipelineStatus').textContent = 'done — reel package ready';
+
+    // Populate data into UI
+    renderReelPackage(currentData);
+
+    // Show all 3 panels
+    ['panel1','panel2','panel3'].forEach(id => {
+      document.getElementById(id).classList.add('show');
+    });
+
+  } catch (err) {
+    console.error('Crew run failed:', err);
+    showError(`Error running CrewAI: ${err.message}. Ensure your GEMINI_API_KEY is valid and the server is running.`);
+    document.getElementById('pipelineStatus').textContent = 'error — check console';
+  } finally {
+    running = false;
+    clearInterval(timerInt);
+    btn.disabled = false;
+    runRec.style.display = 'inline-block';
+    runSpinner.style.display = 'none';
+    runText.textContent = 'RUN CREW';
+  }
+}
+
+function setPipelineStage(n) {
+  document.getElementById('seg' + n).className = 'seg active';
+  const label = document.getElementById('label' + n);
+  label.className = 'stage-label active unlocked';
+  const names = ['Ideation', 'Script Writing', 'Engagement Optimization'];
+  document.getElementById('pipelineStatus').textContent = `running — agent ${n} of 3 (${names[n-1]})`;
+}
+
+function markStageDone(n) {
+  document.getElementById('seg' + n).className = 'seg done';
+  document.getElementById('label' + n).className = 'stage-label done unlocked';
+}
+
+function renderReelPackage(data) {
+  if (!data) return;
+
+  // Phone Mockup
+  const hook = data.hook_preview || (data.shots && data.shots[0] ? data.shots[0].line : "Ready to shoot!");
+  document.getElementById('phoneHook').textContent = hook;
+
+  if (data.engagement) {
+    document.getElementById('phoneCaption').textContent = data.engagement.caption || '';
+    if (data.engagement.hashtags_reach && data.engagement.hashtags_reach.length > 0) {
+      const tag = data.engagement.hashtags_reach[0];
+      document.getElementById('phoneTag').textContent = tag.startsWith('#') ? tag : '#' + tag;
+    }
+  }
+
+  // Panel 1: Concept
+  if (data.concept) {
+    document.getElementById('valConcept').textContent = data.concept.concept || '—';
+    document.getElementById('valFormat').textContent = data.concept.format || '—';
+    document.getElementById('valAudio').textContent = data.concept.audio_style || '—';
+    document.getElementById('valEmotion').textContent = data.concept.target_emotion || '—';
+    document.getElementById('valWhy').textContent = data.concept.why_it_works || '—';
+  }
+
+  // Panel 2: Shots Table
+  if (Array.isArray(data.shots)) {
+    const tbody = document.getElementById('shotTableBody');
+    tbody.innerHTML = '';
+    data.shots.forEach(item => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${escapeHtml(item.shot)}</td>
+        <td class="timing">${escapeHtml(item.timing)}</td>
+        <td class="type"><span class="badge-type">${escapeHtml(item.type || 'SPOKEN')}</span></td>
+        <td>${escapeHtml(item.line)}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // Panel 3: Engagement
+  if (data.engagement) {
+    document.getElementById('finalCaption').textContent = data.engagement.caption || '';
+    document.getElementById('postingTime').textContent = data.engagement.posting_time || '9–10:30 PM';
+    document.getElementById('postingDay').textContent = data.engagement.posting_day || 'weekday';
+    document.getElementById('postingTip').textContent = data.engagement.posting_tip || '';
+
+    // Hashtags
+    renderTags('reachTags', data.engagement.hashtags_reach, 'reach');
+    renderTags('nicheTags', data.engagement.hashtags_niche, 'niche');
+    renderTags('communityTags', data.engagement.hashtags_community, '');
+  }
+}
+
+function renderTags(containerId, tags, styleClass) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  if (!Array.isArray(tags)) return;
+  tags.forEach(t => {
+    const span = document.createElement('span');
+    span.className = 'tag' + (styleClass ? ' ' + styleClass : '');
+    span.textContent = t.startsWith('#') ? t : '#' + t;
+    container.appendChild(span);
+  });
+}
+
+function showPanel(n){
+  const label = document.getElementById('label' + n);
+  if(!label.classList.contains('unlocked')) return;
+  const panel = document.getElementById('panel' + n);
+  panel.classList.toggle('show');
+}
+
+function showError(msg) {
+  const b = document.getElementById('errorBanner');
+  b.textContent = msg;
+  b.style.display = 'block';
+}
+
+function hideError() {
+  const b = document.getElementById('errorBanner');
+  b.style.display = 'none';
+}
+
+// Copy Utilities
+function copyToClipboard(text, btnId, successLabel) {
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById(btnId);
+    if (!btn) return;
+    const old = btn.textContent;
+    btn.textContent = '✓ ' + successLabel;
+    btn.parentElement.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = old;
+      btn.parentElement.classList.remove('copied');
+    }, 2000);
+  }).catch(err => {
+    console.error('Clipboard copy error:', err);
+  });
+}
+
+function copyConcept() {
+  if (!currentData || !currentData.concept) return;
+  const c = currentData.concept;
+  const text = `REEL CONCEPT: ${c.concept}\nFORMAT: ${c.format}\nAUDIO: ${c.audio_style}\nEMOTION: ${c.target_emotion}\nWHY IT WORKS: ${c.why_it_works}`;
+  copyToClipboard(text, 'copyConceptText', 'Copied Concept!');
+}
+
+function copyScript() {
+  if (!currentData || !Array.isArray(currentData.shots)) return;
+  let text = "REEL SCRIPT BREAKDOWN:\n\n";
+  currentData.shots.forEach(s => {
+    text += `[${s.shot}] (${s.timing}) [${s.type}]: ${s.line}\n`;
+  });
+  copyToClipboard(text, 'copyScriptText', 'Copied Script!');
+}
+
+function copyCaption() {
+  if (!currentData || !currentData.engagement) return;
+  const e = currentData.engagement;
+  const allTags = [
+    ...(e.hashtags_reach || []),
+    ...(e.hashtags_niche || []),
+    ...(e.hashtags_community || [])
+  ].map(t => t.startsWith('#') ? t : '#' + t).join(' ');
+
+  const text = `${e.caption}\n\n.\n.\n${allTags}`;
+  copyToClipboard(text, 'copyCaptionText', 'Copied Caption & Tags!');
+}
+</script>
+</body>
+</html>
