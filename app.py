@@ -382,20 +382,24 @@ def parse_crew_fallback(raw_output: str, theme: str) -> dict:
 
 # ----------------- Flask Web App -----------------
 
-app = Flask(__name__, static_folder=".")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+app = Flask(__name__, static_folder=BASE_DIR)
 CORS(app)
 
 @app.route("/")
 def serve_index():
     for fname in ["index.html", ".html"]:
-        if os.path.exists(fname):
-            return send_file(fname)
+        fpath = os.path.join(BASE_DIR, fname)
+        if os.path.exists(fpath):
+            return send_file(fpath)
     return "<h1>index.html not found</h1>", 404
 
 @app.route("/favicon.ico")
 def favicon():
-    if os.path.exists("favicon.ico"):
-        return send_file("favicon.ico", mimetype="image/x-icon")
+    fav_path = os.path.join(BASE_DIR, "favicon.ico")
+    if os.path.exists(fav_path):
+        return send_file(fav_path, mimetype="image/x-icon")
     return Response(status=204)
 
 @app.route("/api/health", methods=["GET"])
